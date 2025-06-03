@@ -246,6 +246,93 @@ class TodoManager:
         
         return removed_count
 
+    def extract_todos(self, claude_analysis, gpt_review, gemini_suggestions, file_path):
+        """
+        Extrait les tâches TODO à partir des analyses des trois agents.
+        
+        Args:
+            claude_analysis (str): Analyse de Claude
+            gpt_review (str): Review de ChatGPT
+            gemini_suggestions (str): Suggestions de Gemini
+            file_path (str): Chemin du fichier analysé
+            
+        Returns:
+            list: Liste des tâches TODO
+        """
+        todos = []
+        
+        # Extraction depuis l'analyse de Claude
+        claude_todos = self._extract_todos_from_text(claude_analysis)
+        todos.extend(claude_todos)
+        
+        # Extraction depuis la review de ChatGPT
+        gpt_todos = self._extract_todos_from_text(gpt_review)
+        todos.extend(gpt_todos)
+        
+        # Extraction depuis les suggestions de Gemini
+        gemini_todos = self._extract_todos_from_text(gemini_suggestions)
+        todos.extend(gemini_todos)
+        
+        # Ajout du fichier source à chaque TODO
+        for todo in todos:
+            todo['file'] = file_path
+        
+        return todos
+
+    def _extract_todos_from_text(self, content: str) -> List[Dict]:
+        """
+        Extrait les tâches TODO à partir du texte d'une analyse.
+        
+        Args:
+            content (str): Contenu de l'analyse
+            
+        Returns:
+            List[Dict]: Liste des tâches TODO extraites
+        """
+        todos = []
+        lines = content.split('\n')
+        current_todo = None
+        
+        for line in lines:
+            # Détection des titres qui pourraient indiquer une tâche TODO
+            if line.startswith('##') and ('todo' in line.lower() or 'tâche' in line.lower() or 'amélioration' in line.lower()):
+                # Sauvegarder la tâche précédente si elle existe
+                if current_todo:
+                    todos.append(current_todo)
+                
+                # Commencer une nouvelle tâche
+                current_todo = {
+                    'description': line.lstrip('#').strip(),
+                    'priority': 'Moyenne',
+                    'effort': 'Moyen'
+                }
+            
+            # Détection de la priorité
+            elif current_todo and ('priorité' in line.lower() or 'priority' in line.lower()):
+                if 'critique' in line.lower() or 'critical' in line.lower():
+                    current_todo['priority'] = 'Critique'
+                elif 'élevée' in line.lower() or 'high' in line.lower():
+                    current_todo['priority'] = 'Élevée'
+                elif 'moyenne' in line.lower() or 'medium' in line.lower():
+                    current_todo['priority'] = 'Moyenne'
+                elif 'faible' in line.lower() or 'low' in line.lower():
+                    current_todo['priority'] = 'Faible'
+            
+            # Détection du niveau d'effort
+            elif current_todo and 'effort' in line.lower():
+                if 'élevé' in line.lower() or 'high' in line.lower():
+                    current_todo['effort'] = 'Élevé'
+                elif 'moyen' in line.lower() or 'medium' in line.lower():
+                    current_todo['effort'] = 'Moyen'
+                elif 'faible' in line.lower() or 'low' in line.lower():
+                    current_todo['effort'] = 'Faible'
+        
+        # Ajouter la dernière tâche si elle existe
+        if current_todo:
+            todos.append(current_todo)
+        
+        return todos
+
 # Test unitaire simple si exécuté directement
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

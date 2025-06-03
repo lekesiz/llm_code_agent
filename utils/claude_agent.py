@@ -29,9 +29,9 @@ class ClaudeAgent:
         self.model = "claude-3-opus-20240229"
         logger.info(f"Agent Claude initialisé avec le modèle {self.model}")
     
-    def analyze_code(self, code_content, file_path):
+    async def analyze_code(self, code_content: str, file_path: str) -> str:
         """
-        Analyse le code source avec Claude 3 et génère un rapport d'analyse.
+        Analyse le code avec Claude 3.
         
         Args:
             code_content (str): Contenu du code à analyser

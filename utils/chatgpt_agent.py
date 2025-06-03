@@ -30,7 +30,7 @@ class ChatGPTAgent:
         self.model = "gpt-4o"  # Utilisation de GPT-4o par défaut, peut être modifié selon disponibilité
         logger.info(f"Agent ChatGPT initialisé avec le modèle {self.model}")
     
-    def review_code(self, code_content, claude_analysis, file_path):
+    async def analyze_code(self, code_content: str, claude_analysis: str, file_path: str) -> str:
         """
         Valide le code et propose des suggestions d'amélioration en s'appuyant sur l'analyse de Claude.
         
@@ -240,7 +240,7 @@ if __name__ == "__main__":
             mock_claude_analysis = f"# Analyse de {test_file}\n\nCe fichier présente quelques problèmes potentiels..."
             
             agent = ChatGPTAgent()
-            review = agent.review_code(code, mock_claude_analysis, test_file)
+            review = agent.analyze_code(code, mock_claude_analysis, test_file)
             
             print(review[:500] + "...\n[Validation tronquée pour l'affichage]")
         else:

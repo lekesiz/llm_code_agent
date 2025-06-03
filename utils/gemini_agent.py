@@ -147,7 +147,7 @@ Merci de fournir des suggestions avancées et innovantes pour améliorer ce code
 
 """
 
-    def suggest_refactoring(self, code_content: str, claude_analysis: str, file_path: str) -> str:
+    async def suggest_refactoring(self, code_content: str, claude_analysis: str, file_path: str) -> str:
         """
         Propose des suggestions avancées de refactoring et d'amélioration du code.
         En cas d'échec de Gemini, utilise Claude comme fallback.

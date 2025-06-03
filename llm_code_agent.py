@@ -17,6 +17,10 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import List, Dict, Optional, Set
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Chargement des variables d'environnement
+load_dotenv()
 
 import click
 from rich.console import Console
@@ -94,26 +98,22 @@ class LLMCodeAgent:
             
             # Lecture du fichier
             with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+                code_content = f.read()
             
-            # Analyse parallèle avec les trois agents
-            async with asyncio.TaskGroup() as group:
-                claude_task = group.create_task(self.claude_agent.analyze_code(content, file_path))
-                gpt_task = group.create_task(self.gpt_agent.analyze_code(content, file_path))
-                gemini_task = group.create_task(self.gemini_agent.suggest_refactoring(file_path))
+            # Analyse avec Claude
+            claude_analysis = await self.claude_agent.analyze_code(code_content, file_path)
             
-            # Récupération des résultats
-            claude_analysis = claude_task.result()
-            gpt_review = gpt_task.result()
-            gemini_suggestions = gemini_task.result()
+            # Analyse avec ChatGPT
+            gpt_review = await self.gpt_agent.analyze_code(code_content, claude_analysis, file_path)
+            
+            # Suggestions avec Gemini
+            gemini_suggestions = await self.gemini_agent.suggest_refactoring(code_content, claude_analysis, file_path)
             
             # Extraction des TODOs
-            todos = self.todo_manager.extract_todos(
-                claude_analysis,
-                gpt_review,
-                gemini_suggestions,
-                file_path
-            )
+            todos = self.todo_manager.extract_todos(claude_analysis, gpt_review, gemini_suggestions, file_path)
+            
+            # Ajout des TODOs au gestionnaire
+            self.todo_manager.add_todos(todos, "Multi-Agent Analysis")
             
             # Mise à jour des statistiques
             self.stats['files_processed'] += 1
