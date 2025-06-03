@@ -10,12 +10,14 @@ import os
 import logging
 import time
 import google.generativeai as genai
+from .claude_agent import ClaudeAgent
 
 logger = logging.getLogger('llm_code_agent.gemini_agent')
 
 class GeminiAgent:
     """
     Agent de suggestions avancées de refactoring utilisant Gemini Pro de Google.
+    En cas d'échec, utilise Claude comme fallback.
     """
     
     def __init__(self):
@@ -27,11 +29,13 @@ class GeminiAgent:
         
         genai.configure(api_key=self.api_key)
         self.model = "gemini-pro"
+        self.claude_fallback = ClaudeAgent()  # Initialisation du fallback Claude
         logger.info(f"Agent Gemini initialisé avec le modèle {self.model}")
     
     def suggest_refactoring(self, code_content, claude_analysis, file_path):
         """
         Propose des suggestions avancées de refactoring et d'amélioration du code.
+        En cas d'échec de Gemini, utilise Claude comme fallback.
         
         Args:
             code_content (str): Contenu du code à analyser
@@ -142,15 +146,50 @@ Merci de fournir des suggestions avancées et innovantes pour améliorer ce code
                     retry_delay *= 2  # Backoff exponentiel
                 else:
                     logger.error(f"Échec de la génération de suggestions après {max_retries} tentatives")
-                    return f"""# Erreur de génération de suggestions pour {file_name}
+                    logger.info("Utilisation de Claude comme fallback...")
+                    
+                    # Utilisation de Claude comme fallback
+                    try:
+                        fallback_prompt = f"""
+                        En tant qu'expert en refactoring de code, analyse ce fichier {language} et propose des suggestions avancées d'amélioration.
+                        Inclus des exemples de code, des niveaux d'effort et des priorités.
+                        
+                        Code à analyser:
+                        ```{language}
+                        {code_content}
+                        ```
+                        
+                        Analyse préalable:
+                        {claude_analysis[:1500]}... (analyse tronquée)
+                        """
+                        
+                        fallback_suggestions = self.claude_fallback.analyze_code(fallback_prompt)
+                        
+                        header = f"""# Suggestions avancées de refactoring pour {file_name} par Claude (Fallback)
 
-Une erreur s'est produite lors de la génération de suggestions avec Gemini Pro:
+*Ce rapport a été généré automatiquement par l'agent d'analyse de code multi-LLM suite à un échec de Gemini.*
+
+**Fichier analysé:** {file_path}  
+**Date d'analyse:** {time.strftime('%Y-%m-%d %H:%M:%S')}  
+**Modèle utilisé:** Claude (Fallback)
+
+---
+
+"""
+                        
+                        return header + fallback_suggestions
+                        
+                    except Exception as fallback_error:
+                        logger.error(f"Échec du fallback avec Claude: {str(fallback_error)}")
+                        return f"""# Erreur de génération de suggestions pour {file_name}
+
+Une erreur s'est produite lors de la génération de suggestions avec Gemini Pro et le fallback Claude:
 
 ```
 {str(e)}
 ```
 
-Veuillez vérifier votre connexion internet et votre clé API, puis réessayer.
+Veuillez vérifier votre connexion internet et vos clés API, puis réessayer.
 """
 
     def extract_todos_from_suggestions(self, suggestions_content):
