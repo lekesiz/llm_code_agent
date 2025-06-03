@@ -12,7 +12,7 @@ import time
 import json
 import re
 from typing import List, Dict, Optional
-from google import genai
+import google.generativeai as genai
 from .claude_agent import ClaudeAgent
 
 logger = logging.getLogger('llm_code_agent.gemini_agent')
@@ -42,8 +42,9 @@ class GeminiAgent:
     def __init__(self):
         """Initialise l'agent Gemini avec la configuration nécessaire."""
         self.api_key = self._get_api_key()
-        self.client = genai.Client(api_key=self.api_key)
+        genai.configure(api_key=self.api_key)
         self.model = "gemini-pro"
+        self.gemini_model = genai.GenerativeModel(self.model)
         self.claude_fallback = ClaudeAgent()
         logger.info(f"Agent Gemini initialisé avec le modèle {self.model}")
     
@@ -117,10 +118,7 @@ Merci de fournir des suggestions avancées et innovantes pour améliorer ce code
         """Génère des suggestions avec Gemini Pro."""
         for attempt in range(MAX_RETRIES):
             try:
-                response = self.client.models.generate_content(
-                    model=self.model,
-                    contents=prompt
-                )
+                response = self.gemini_model.generate_content(prompt)
                 return response.text
             except Exception as e:
                 retry_delay = INITIAL_RETRY_DELAY * (2 ** attempt)

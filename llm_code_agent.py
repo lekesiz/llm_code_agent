@@ -28,7 +28,7 @@ from rich.table import Table
 from utils.gemini_agent import GeminiAgent
 from utils.todo_manager import TodoManager
 from utils.claude_agent import ClaudeAgent
-from utils.gpt_agent import GPTAgent
+from utils.chatgpt_agent import ChatGPTAgent
 
 # Configuration du logging
 logging.basicConfig(
@@ -70,7 +70,7 @@ class LLMCodeAgent:
         """Initialise les agents LLM."""
         try:
             self.claude_agent = ClaudeAgent()
-            self.gpt_agent = GPTAgent()
+            self.gpt_agent = ChatGPTAgent()
             self.gemini_agent = GeminiAgent()
             logger.info("Agents LLM initialisés avec succès")
         except Exception as e:
