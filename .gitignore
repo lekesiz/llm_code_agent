@@ -29,4 +29,4 @@ Thumbs.db
 analysis_reports/
 refactoring_suggestions/
 test_project/
-project_todo.json 
+project_todo.json .DS_Store
