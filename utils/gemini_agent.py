@@ -9,7 +9,7 @@ Ce module est responsable des suggestions avancées et des idées d'amélioratio
 import os
 import logging
 import time
-import google.generativeai as genai
+from google import genai
 from .claude_agent import ClaudeAgent
 
 logger = logging.getLogger('llm_code_agent.gemini_agent')
@@ -27,8 +27,8 @@ class GeminiAgent:
             logger.error("Clé API Google non trouvée. Veuillez définir GOOGLE_API_KEY dans le fichier .env")
             raise ValueError("Clé API Google manquante")
         
-        genai.configure(api_key=self.api_key)
-        self.model = "gemini-pro"
+        self.client = genai.Client(api_key=self.api_key)
+        self.model = "gemini-2.0-flash"  # Güncel model adı
         self.claude_fallback = ClaudeAgent()  # Initialisation du fallback Claude
         logger.info(f"Agent Gemini initialisé avec le modèle {self.model}")
     
@@ -115,8 +115,10 @@ Merci de fournir des suggestions avancées et innovantes pour améliorer ce code
         
         for attempt in range(max_retries):
             try:
-                model = genai.GenerativeModel(self.model)
-                response = model.generate_content(prompt)
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=prompt
+                )
                 
                 suggestions = response.text
                 
