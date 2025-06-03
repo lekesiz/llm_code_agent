@@ -2,275 +2,362 @@
 # -*- coding: utf-8 -*-
 
 """
-LLM Destekli Kod Analiz ve Refaktör Ajanı
------------------------------------------
-Un agent d'analyse de code multi-LLM qui utilise Claude 3, GPT-4 et Gemini Pro
-pour analyser des projets logiciels, détecter des erreurs et proposer des améliorations.
-
-Auteur: Manus
-Date: Juin 2025
+Script principal de l'agent d'analyse de code multi-LLM.
+Ce script coordonne l'analyse de code avec Claude, ChatGPT et Gemini.
 """
 
 import os
 import sys
-import argparse
+import json
+import time
 import logging
+import argparse
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from dotenv import load_dotenv
+from typing import List, Dict, Optional, Set
+from datetime import datetime
 
-# Import des modules utilitaires
-from utils.file_scanner import FileScanner
-from utils.claude_agent import ClaudeAgent
-from utils.chatgpt_agent import ChatGPTAgent
+import click
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.logging import RichHandler
+from rich.panel import Panel
+from rich.table import Table
+
 from utils.gemini_agent import GeminiAgent
 from utils.todo_manager import TodoManager
-from utils.html_exporter import HTMLExporter
+from utils.claude_agent import ClaudeAgent
+from utils.gpt_agent import GPTAgent
 
 # Configuration du logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True)]
 )
-logger = logging.getLogger('llm_code_agent')
+logger = logging.getLogger("llm_code_agent")
+
+# Initialisation de Rich
+console = Console()
 
 class LLMCodeAgent:
-    """Classe principale de l'agent d'analyse de code multi-LLM."""
+    """
+    Agent principal d'analyse de code multi-LLM.
+    Coordonne l'analyse avec Claude, ChatGPT et Gemini.
+    """
     
-    def __init__(self):
-        """Initialise l'agent avec les configurations et dépendances nécessaires."""
-        # Chargement des variables d'environnement depuis .env
-        load_dotenv()
+    def __init__(self, config: Optional[Dict] = None):
+        """
+        Initialise l'agent d'analyse de code.
         
-        # Vérification des clés API
-        self._check_api_keys()
-        
-        # Initialisation des composants
-        self.file_scanner = FileScanner()
-        self.claude_agent = ClaudeAgent()
-        self.chatgpt_agent = ChatGPTAgent()
-        self.gemini_agent = GeminiAgent()
+        Args:
+            config (Dict, optional): Configuration personnalisée
+        """
+        self.config = config or {}
+        self.setup_agents()
         self.todo_manager = TodoManager()
-        self.html_exporter = HTMLExporter()
-        
-        # Création des dossiers de sortie s'ils n'existent pas
-        self._ensure_output_dirs()
-    
-    def _check_api_keys(self):
-        """Vérifie la présence des clés API nécessaires."""
-        required_keys = {
-            'ANTHROPIC_API_KEY': 'Claude',
-            'OPENAI_API_KEY': 'OpenAI GPT',
-            'GOOGLE_API_KEY': 'Google Gemini'
+        self.processed_files: Set[str] = set()
+        self.stats = {
+            'start_time': time.time(),
+            'files_processed': 0,
+            'total_todos': 0,
+            'errors': 0
         }
-        
-        missing_keys = []
-        for key, service in required_keys.items():
-            if not os.getenv(key):
-                missing_keys.append(f"{service} ({key})")
-        
-        if missing_keys:
-            logger.error(f"Clés API manquantes: {', '.join(missing_keys)}")
-            logger.error("Veuillez ajouter les clés API manquantes dans le fichier .env")
-            sys.exit(1)
-        
-        logger.info("Toutes les clés API requises sont présentes.")
     
-    def _ensure_output_dirs(self):
-        """Crée les dossiers de sortie s'ils n'existent pas."""
-        dirs = [
-            'analysis_reports',
-            'refactoring_suggestions'
-        ]
-        
-        for dir_name in dirs:
-            dir_path = Path(dir_name)
-            if not dir_path.exists():
-                dir_path.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Dossier créé: {dir_path}")
-    
-    def analyze_project(self, project_path):
-        """
-        Analyse un projet complet en parcourant tous les fichiers compatibles.
-        
-        Args:
-            project_path (str): Chemin vers le dossier du projet à analyser
-        """
-        logger.info(f"Début de l'analyse du projet: {project_path}")
-        
-        # Scan du projet pour trouver les fichiers à analyser
-        files = self.file_scanner.scan_directory(project_path)
-        logger.info(f"Nombre de fichiers trouvés: {len(files)}")
-        
-        # Analyse de chaque fichier
-        for file_path in files:
-            self.analyze_file(file_path)
-        
-        # Génération du rapport principal
-        self._generate_master_report(project_path, files)
-        
-        logger.info(f"Analyse du projet terminée: {project_path}")
-    
-    def analyze_file(self, file_path):
-        """
-        Analyse un fichier individuel avec les trois LLMs.
-        
-        Args:
-            file_path (str): Chemin vers le fichier à analyser
-        """
-        rel_path = os.path.basename(file_path)
-        logger.info(f"Analyse du fichier: {rel_path}")
-        
+    def setup_agents(self):
+        """Initialise les agents LLM."""
         try:
-            # Lecture du contenu du fichier
+            self.claude_agent = ClaudeAgent()
+            self.gpt_agent = GPTAgent()
+            self.gemini_agent = GeminiAgent()
+            logger.info("Agents LLM initialisés avec succès")
+        except Exception as e:
+            logger.error(f"Erreur lors de l'initialisation des agents: {str(e)}")
+            raise
+    
+    async def analyze_file(self, file_path: str) -> Dict:
+        """
+        Analyse un fichier avec les trois agents LLM.
+        
+        Args:
+            file_path (str): Chemin du fichier à analyser
+            
+        Returns:
+            Dict: Résultats de l'analyse
+        """
+        try:
+            # Vérification du fichier
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"Fichier non trouvé: {file_path}")
+            
+            # Lecture du fichier
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # 1. Analyse avec Claude
-            logger.info(f"Analyse avec Claude: {rel_path}")
-            claude_analysis = self.claude_agent.analyze_code(content, file_path)
-            claude_output_path = f"analysis_reports/{os.path.basename(file_path)}_claude_analysis.md"
-            with open(claude_output_path, 'w', encoding='utf-8') as f:
-                f.write(claude_analysis)
+            # Analyse parallèle avec les trois agents
+            async with asyncio.TaskGroup() as group:
+                claude_task = group.create_task(self.claude_agent.analyze_code(content, file_path))
+                gpt_task = group.create_task(self.gpt_agent.analyze_code(content, file_path))
+                gemini_task = group.create_task(self.gemini_agent.suggest_refactoring(file_path))
             
-            # 2. Analyse avec GPT
-            logger.info(f"Analyse avec GPT: {rel_path}")
-            gpt_review = self.chatgpt_agent.review_code(content, claude_analysis, file_path)
-            gpt_output_path = f"refactoring_suggestions/{os.path.basename(file_path)}_chatgpt_review.md"
-            with open(gpt_output_path, 'w', encoding='utf-8') as f:
-                f.write(gpt_review)
+            # Récupération des résultats
+            claude_analysis = claude_task.result()
+            gpt_review = gpt_task.result()
+            gemini_suggestions = gemini_task.result()
             
-            # 3. Analyse avec Gemini
-            logger.info(f"Analyse avec Gemini: {rel_path}")
-            gemini_suggestions = self.gemini_agent.suggest_refactoring(content, claude_analysis, file_path)
-            gemini_output_path = f"refactoring_suggestions/{os.path.basename(file_path)}_gemini_suggestions.md"
-            with open(gemini_output_path, 'w', encoding='utf-8') as f:
-                f.write(gemini_suggestions)
+            # Extraction des TODOs
+            todos = self.todo_manager.extract_todos(
+                claude_analysis,
+                gpt_review,
+                gemini_suggestions,
+                file_path
+            )
             
-            # 4. Extraction des tâches TODO
-            todos = self.todo_manager.extract_todos(claude_analysis, gpt_review, gemini_suggestions, file_path)
-            self.todo_manager.save_todos(todos)
+            # Mise à jour des statistiques
+            self.stats['files_processed'] += 1
+            self.stats['total_todos'] += len(todos)
             
-            logger.info(f"Analyse complète pour: {rel_path}")
-            return True
+            return {
+                'file': file_path,
+                'claude_analysis': claude_analysis,
+                'gpt_review': gpt_review,
+                'gemini_suggestions': gemini_suggestions,
+                'todos': todos
+            }
             
         except Exception as e:
-            logger.error(f"Erreur lors de l'analyse de {rel_path}: {str(e)}")
-            return False
+            logger.error(f"Erreur lors de l'analyse de {file_path}: {str(e)}")
+            self.stats['errors'] += 1
+            return {
+                'file': file_path,
+                'error': str(e)
+            }
     
-    def _generate_master_report(self, project_path, files):
+    async def analyze_project(self, project_path: str) -> List[Dict]:
         """
-        Génère le rapport principal d'analyse du projet.
+        Analyse un projet complet.
         
         Args:
-            project_path (str): Chemin vers le dossier du projet analysé
-            files (list): Liste des fichiers analysés
+            project_path (str): Chemin du projet à analyser
+            
+        Returns:
+            List[Dict]: Résultats de l'analyse
         """
-        logger.info("Génération du rapport principal...")
-        
-        # Collecte des informations pour le rapport principal
-        project_name = os.path.basename(os.path.abspath(project_path))
-        file_count = len(files)
-        todo_count = self.todo_manager.get_todo_count()
-        
-        # Création du contenu du rapport
-        report_content = f"""# Rapport d'analyse du projet: {project_name}
-
-## Résumé
-
-- **Projet analysé:** {project_name}
-- **Chemin:** {os.path.abspath(project_path)}
-- **Nombre de fichiers analysés:** {file_count}
-- **Nombre de tâches identifiées:** {todo_count}
-- **Date d'analyse:** {self.todo_manager.get_current_date()}
-
-## Fichiers analysés
-
-"""
-        
-        # Ajout de la liste des fichiers analysés
-        for file_path in files:
-            rel_path = os.path.relpath(file_path, project_path)
-            report_content += f"- [{rel_path}](analysis_reports/{os.path.basename(file_path)}_claude_analysis.md)\n"
-        
-        # Ajout des tâches principales identifiées
-        report_content += "\n## Principales tâches identifiées\n\n"
-        top_todos = self.todo_manager.get_top_todos(10)
-        for todo in top_todos:
-            report_content += f"- {todo['description']} (Priorité: {todo['priority']}, Fichier: {todo['file']})\n"
-        
-        # Ajout des liens vers les rapports complets
-        report_content += "\n## Rapports détaillés\n\n"
-        report_content += "### Analyses Claude\n\n"
-        for file_path in files:
-            file_name = os.path.basename(file_path)
-            report_content += f"- [{file_name}](analysis_reports/{file_name}_claude_analysis.md)\n"
-        
-        report_content += "\n### Suggestions de refactoring (ChatGPT)\n\n"
-        for file_path in files:
-            file_name = os.path.basename(file_path)
-            report_content += f"- [{file_name}](refactoring_suggestions/{file_name}_chatgpt_review.md)\n"
-        
-        report_content += "\n### Suggestions avancées (Gemini)\n\n"
-        for file_path in files:
-            file_name = os.path.basename(file_path)
-            report_content += f"- [{file_name}](refactoring_suggestions/{file_name}_gemini_suggestions.md)\n"
-        
-        # Écriture du rapport principal
-        with open("master_project_analysis_report.md", 'w', encoding='utf-8') as f:
-            f.write(report_content)
-        
-        # Génération de la version HTML
-        self.html_exporter.convert_to_html("master_project_analysis_report.md", "master_project_analysis_report.html")
-        
-        logger.info("Rapport principal généré avec succès.")
-
-def main():
-    """Point d'entrée principal du programme."""
-    parser = argparse.ArgumentParser(
-        description="LLM Destekli Kod Analiz ve Refaktör Ajanı - Un agent d'analyse de code multi-LLM"
-    )
-    parser.add_argument(
-        "project_path", 
-        help="Chemin vers le dossier du projet à analyser"
-    )
-    parser.add_argument(
-        "-f", "--file", 
-        help="Analyser un fichier spécifique au lieu du projet entier"
-    )
-    parser.add_argument(
-        "-v", "--verbose", 
-        action="store_true", 
-        help="Afficher des informations détaillées"
-    )
+        try:
+            # Vérification du projet
+            if not os.path.exists(project_path):
+                raise FileNotFoundError(f"Projet non trouvé: {project_path}")
+            
+            # Recherche des fichiers à analyser
+            files_to_analyze = []
+            for root, _, files in os.walk(project_path):
+                for file in files:
+                    if file.endswith(('.py', '.js', '.java', '.cpp', '.h', '.hpp')):
+                        file_path = os.path.join(root, file)
+                        if file_path not in self.processed_files:
+                            files_to_analyze.append(file_path)
+            
+            # Analyse des fichiers
+            results = []
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console
+            ) as progress:
+                task = progress.add_task("Analyse en cours...", total=len(files_to_analyze))
+                
+                for file_path in files_to_analyze:
+                    result = await self.analyze_file(file_path)
+                    results.append(result)
+                    self.processed_files.add(file_path)
+                    progress.update(task, advance=1)
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de l'analyse du projet: {str(e)}")
+            raise
     
-    args = parser.parse_args()
+    def generate_report(self, results: List[Dict], output_dir: str = "analysis_reports"):
+        """
+        Génère les rapports d'analyse.
+        
+        Args:
+            results (List[Dict]): Résultats de l'analyse
+            output_dir (str): Dossier de sortie
+        """
+        try:
+            # Création du dossier de sortie
+            os.makedirs(output_dir, exist_ok=True)
+            
+            # Génération des rapports par fichier
+            for result in results:
+                if 'error' in result:
+                    continue
+                
+                file_name = os.path.basename(result['file'])
+                base_name = os.path.splitext(file_name)[0]
+                
+                # Rapport Claude
+                claude_report = os.path.join(output_dir, f"{file_name}_claude_analysis.md")
+                with open(claude_report, 'w', encoding='utf-8') as f:
+                    f.write(result['claude_analysis'])
+                
+                # Rapport GPT
+                gpt_report = os.path.join(output_dir, f"{file_name}_chatgpt_review.md")
+                with open(gpt_report, 'w', encoding='utf-8') as f:
+                    f.write(result['gpt_review'])
+                
+                # Suggestions Gemini
+                gemini_report = os.path.join(output_dir, f"{file_name}_gemini_suggestions.md")
+                with open(gemini_report, 'w', encoding='utf-8') as f:
+                    f.write(result['gemini_suggestions'])
+            
+            # Rapport global
+            self._generate_global_report(results, output_dir)
+            
+            logger.info(f"Rapports générés dans {output_dir}")
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la génération des rapports: {str(e)}")
+            raise
     
-    # Configuration du niveau de logging
-    if args.verbose:
-        logger.setLevel(logging.DEBUG)
+    def _generate_global_report(self, results: List[Dict], output_dir: str):
+        """
+        Génère le rapport global du projet.
+        
+        Args:
+            results (List[Dict]): Résultats de l'analyse
+            output_dir (str): Dossier de sortie
+        """
+        try:
+            # Création du rapport
+            report = []
+            report.append("# Rapport d'Analyse Global du Projet\n")
+            report.append(f"*Généré le {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n")
+            
+            # Statistiques
+            report.append("## Statistiques\n")
+            report.append(f"- Fichiers analysés: {self.stats['files_processed']}")
+            report.append(f"- Tâches TODO identifiées: {self.stats['total_todos']}")
+            report.append(f"- Erreurs rencontrées: {self.stats['errors']}")
+            report.append(f"- Temps d'exécution: {time.time() - self.stats['start_time']:.2f} secondes\n")
+            
+            # Résumé par fichier
+            report.append("## Résumé par Fichier\n")
+            for result in results:
+                if 'error' in result:
+                    report.append(f"### {result['file']} (Erreur)")
+                    report.append(f"Erreur: {result['error']}\n")
+                else:
+                    report.append(f"### {result['file']}")
+                    report.append(f"- TODOs: {len(result['todos'])}")
+                    report.append(f"- Analyse Claude: {len(result['claude_analysis'].split())} mots")
+                    report.append(f"- Review GPT: {len(result['gpt_review'].split())} mots")
+                    report.append(f"- Suggestions Gemini: {len(result['gemini_suggestions'].split())} mots\n")
+            
+            # Écriture du rapport
+            report_path = os.path.join(output_dir, "master_project_analysis_report.md")
+            with open(report_path, 'w', encoding='utf-8') as f:
+                f.write('\n'.join(report))
+            
+            # Conversion en HTML
+            self._convert_to_html(report_path)
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la génération du rapport global: {str(e)}")
+            raise
     
-    # Initialisation de l'agent
-    agent = LLMCodeAgent()
-    
-    # Analyse du projet ou d'un fichier spécifique
-    if args.file:
-        file_path = os.path.join(args.project_path, args.file) if not os.path.isabs(args.file) else args.file
-        if os.path.isfile(file_path):
-            agent.analyze_file(file_path)
-        else:
-            logger.error(f"Le fichier spécifié n'existe pas: {file_path}")
-            sys.exit(1)
-    else:
-        if os.path.isdir(args.project_path):
-            agent.analyze_project(args.project_path)
-        else:
-            logger.error(f"Le dossier spécifié n'existe pas: {args.project_path}")
-            sys.exit(1)
-    
-    logger.info("Analyse terminée avec succès.")
+    def _convert_to_html(self, markdown_path: str):
+        """
+        Convertit le rapport Markdown en HTML.
+        
+        Args:
+            markdown_path (str): Chemin du fichier Markdown
+        """
+        try:
+            import markdown
+            with open(markdown_path, 'r', encoding='utf-8') as f:
+                md_content = f.read()
+            
+            html_content = markdown.markdown(
+                md_content,
+                extensions=['extra', 'codehilite', 'tables']
+            )
+            
+            # Ajout du style
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Rapport d'Analyse</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                    h1 {{ color: #2c3e50; }}
+                    h2 {{ color: #34495e; margin-top: 30px; }}
+                    h3 {{ color: #7f8c8d; }}
+                    pre {{ background-color: #f8f9fa; padding: 15px; border-radius: 5px; }}
+                    code {{ background-color: #f8f9fa; padding: 2px 5px; border-radius: 3px; }}
+                    table {{ border-collapse: collapse; width: 100%; margin: 20px 0; }}
+                    th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                    th {{ background-color: #f8f9fa; }}
+                </style>
+            </head>
+            <body>
+                {html_content}
+            </body>
+            </html>
+            """
+            
+            html_path = markdown_path.replace('.md', '.html')
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la conversion en HTML: {str(e)}")
+            raise
 
-if __name__ == "__main__":
+@click.command()
+@click.argument('project_path', type=click.Path(exists=True))
+@click.option('--verbose', '-v', is_flag=True, help='Mode verbeux')
+@click.option('--output', '-o', default='analysis_reports', help='Dossier de sortie')
+@click.option('--format', '-f', type=click.Choice(['markdown', 'html', 'json']), default='markdown', help='Format de sortie')
+def main(project_path: str, verbose: bool, output: str, format: str):
+    """
+    Agent d'analyse de code multi-LLM.
+    
+    PROJECT_PATH: Chemin vers le projet à analyser
+    """
+    try:
+        # Configuration du logging
+        if verbose:
+            logger.setLevel(logging.DEBUG)
+        
+        # Initialisation de l'agent
+        agent = LLMCodeAgent()
+        
+        # Analyse du projet
+        results = asyncio.run(agent.analyze_project(project_path))
+        
+        # Génération des rapports
+        agent.generate_report(results, output)
+        
+        # Affichage des statistiques
+        console.print(Panel.fit(
+            f"[green]Analyse terminée avec succès![/green]\n"
+            f"Fichiers analysés: {agent.stats['files_processed']}\n"
+            f"Tâches TODO: {agent.stats['total_todos']}\n"
+            f"Erreurs: {agent.stats['errors']}\n"
+            f"Temps: {time.time() - agent.stats['start_time']:.2f}s",
+            title="Résultats"
+        ))
+        
+    except Exception as e:
+        logger.error(f"Erreur lors de l'exécution: {str(e)}")
+        sys.exit(1)
+
+if __name__ == '__main__':
     main()

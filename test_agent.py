@@ -2,317 +2,242 @@
 # -*- coding: utf-8 -*-
 
 """
-Script de test pour valider le fonctionnement global de l'agent d'analyse de code multi-LLM.
-Ce script permet de tester l'ensemble des fonctionnalités sur un petit projet exemple.
+Module de test pour l'agent d'analyse de code multi-LLM.
+Ce module contient les tests unitaires et d'intégration pour les différents composants.
 """
 
 import os
 import sys
+import json
 import logging
-import shutil
+import unittest
+from typing import Dict, List, Optional
 from pathlib import Path
+
+# Ajout du répertoire parent au PYTHONPATH
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from utils.gemini_agent import GeminiAgent
+from utils.todo_manager import TodoManager
+from utils.claude_agent import ClaudeAgent
+from utils.gpt_agent import GPTAgent
 
 # Configuration du logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger('test_llm_code_agent')
+logger = logging.getLogger('test_agent')
 
-# Chemin vers le script principal
-MAIN_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_code_agent.py")
-
-def create_test_project():
-    """
-    Crée un petit projet de test avec quelques fichiers pour tester l'agent.
+class TestGeminiAgent(unittest.TestCase):
+    """Tests unitaires pour l'agent Gemini."""
     
-    Returns:
-        str: Chemin vers le projet de test
-    """
-    logger.info("Création d'un projet de test...")
+    def setUp(self):
+        """Initialisation avant chaque test."""
+        self.agent = GeminiAgent()
+        self.test_file = "test_files/test.py"
+        self._create_test_file()
     
-    # Création du dossier de test
-    test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_project")
-    os.makedirs(test_dir, exist_ok=True)
+    def tearDown(self):
+        """Nettoyage après chaque test."""
+        if os.path.exists(self.test_file):
+            os.remove(self.test_file)
     
-    # Création d'un fichier Python
-    python_file = os.path.join(test_dir, "calculator.py")
-    with open(python_file, 'w', encoding='utf-8') as f:
-        f.write("""
-# Simple calculator module with some intentional issues
-
-def add(a, b):
-    return a + b
-
-def subtract(a, b):
-    return a - b
-
-def multiply(a, b):
-    return a * b
-
-def divide(a, b):
-    # Missing check for division by zero
-    return a / b
-
-# Unused function
-def square(a):
-    return a * a
-
-# Function with a bug
-def average(numbers):
+    def _create_test_file(self):
+        """Crée un fichier de test."""
+        os.makedirs(os.path.dirname(self.test_file), exist_ok=True)
+        with open(self.test_file, 'w') as f:
+            f.write("""
+def calculate_total(items):
     total = 0
-    for num in numbers:
-        total += num
-    # Bug: should divide by len(numbers)
+    for item in items:
+        total += item.price
     return total
 
-# Main calculator class with some issues
-class Calculator:
-    def __init__(self):
-        self.result = 0
-    
-    # Method with redundant code
-    def calculate(self, a, b, operation):
-        if operation == 'add':
-            self.result = self.add(a, b)
-        elif operation == 'subtract':
-            self.result = self.subtract(a, b)
-        elif operation == 'multiply':
-            self.result = self.multiply(a, b)
-        elif operation == 'divide':
-            self.result = self.divide(a, b)
-        return self.result
-    
-    # Redundant methods that duplicate the functions above
-    def add(self, a, b):
-        return a + b
-    
-    def subtract(self, a, b):
-        return a - b
-    
-    def multiply(self, a, b):
-        return a * b
-    
-    def divide(self, a, b):
-        return a / b
-
-# Global variable - not a good practice
-calculator = Calculator()
+class Item:
+    def __init__(self, price):
+        self.price = price
 """)
     
-    # Création d'un fichier JavaScript
-    js_file = os.path.join(test_dir, "user_manager.js")
-    with open(js_file, 'w', encoding='utf-8') as f:
-        f.write("""
-// User manager module with some intentional issues
-
-// Global variables - not a good practice
-var users = [];
-var currentUser = null;
-
-// Function with security issues
-function login(username, password) {
-    // Insecure: storing passwords in plain text
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].username === username && users[i].password === password) {
-            currentUser = users[i];
-            console.log("User logged in: " + username);
-            return true;
-        }
-    }
-    console.log("Login failed");
-    return false;
-}
-
-// Function with performance issues
-function findUserById(id) {
-    // Inefficient: should use a map or object for O(1) lookup
-    for (var i = 0; i < users.length; i++) {
-        if (users[i].id === id) {
-            return users[i];
-        }
-    }
-    return null;
-}
-
-// Function with a bug
-function registerUser(username, password, email) {
-    // Bug: doesn't check if username already exists
-    var newUser = {
-        id: users.length + 1,
-        username: username,
-        password: password,  // Security issue: storing password in plain text
-        email: email,
-        createdAt: new Date()
-    };
-    users.push(newUser);
-    return newUser;
-}
-
-// Exposed functions
-module.exports = {
-    login: login,
-    findUserById: findUserById,
-    registerUser: registerUser
-};
-""")
+    def test_suggest_refactoring(self):
+        """Test de la méthode suggest_refactoring."""
+        suggestions = self.agent.suggest_refactoring(self.test_file)
+        self.assertIsNotNone(suggestions)
+        self.assertIsInstance(suggestions, str)
+        self.assertTrue(len(suggestions) > 0)
     
-    # Création d'un fichier HTML
-    html_file = os.path.join(test_dir, "index.html")
-    with open(html_file, 'w', encoding='utf-8') as f:
-        f.write("""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Test Page</title>
-    <style>
-        /* Redundant CSS rules */
-        body {
-            font-family: Arial, sans-serif;
-            font-family: Arial;
-            color: #333;
-            color: #333333;
-        }
+    def test_extract_todos(self):
+        """Test de l'extraction des TODOs."""
+        suggestions = self.agent.suggest_refactoring(self.test_file)
+        todos = self.agent.extract_todos_from_suggestions(suggestions)
+        self.assertIsInstance(todos, list)
+        if todos:
+            self.assertIsInstance(todos[0], dict)
+            self.assertIn('description', todos[0])
+            self.assertIn('priority', todos[0])
+            self.assertIn('effort', todos[0])
+
+class TestTodoManager(unittest.TestCase):
+    """Tests unitaires pour le gestionnaire de tâches TODO."""
+    
+    def setUp(self):
+        """Initialisation avant chaque test."""
+        self.todo_file = "test_todos.json"
+        self.manager = TodoManager(self.todo_file)
+    
+    def tearDown(self):
+        """Nettoyage après chaque test."""
+        if os.path.exists(self.todo_file):
+            os.remove(self.todo_file)
+    
+    def test_add_todos(self):
+        """Test de l'ajout de tâches TODO."""
+        test_todos = [
+            {
+                "description": "Test task 1",
+                "priority": "Élevée",
+                "effort": "Moyen",
+                "file": "test.py"
+            }
+        ]
+        self.manager.add_todos(test_todos, "Test")
+        self.assertEqual(len(self.manager.get_todos()), 1)
+    
+    def test_mark_completed(self):
+        """Test du marquage d'une tâche comme complétée."""
+        test_todos = [
+            {
+                "description": "Test task 1",
+                "priority": "Élevée",
+                "effort": "Moyen",
+                "file": "test.py"
+            }
+        ]
+        self.manager.add_todos(test_todos, "Test")
+        todo_id = self.manager.get_todos()[0]['id']
+        self.assertTrue(self.manager.mark_completed(todo_id))
+        self.assertTrue(self.manager.get_todos(completed=True)[0]['completed'])
+    
+    def test_get_todos_with_filters(self):
+        """Test de la récupération des tâches avec filtres."""
+        test_todos = [
+            {
+                "description": "Test task 1",
+                "priority": "Élevée",
+                "effort": "Moyen",
+                "file": "test1.py"
+            },
+            {
+                "description": "Test task 2",
+                "priority": "Moyenne",
+                "effort": "Faible",
+                "file": "test2.py"
+            }
+        ]
+        self.manager.add_todos(test_todos, "Test")
         
-        /* Unused CSS class */
-        .unused-class {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <!-- Missing alt attribute for accessibility -->
-    <img src="logo.png">
+        # Test des filtres
+        self.assertEqual(len(self.manager.get_todos(file="test1.py")), 1)
+        self.assertEqual(len(self.manager.get_todos(priority="Élevée")), 1)
+        self.assertEqual(len(self.manager.get_todos(effort="Faible")), 1)
     
-    <!-- Deprecated HTML tag -->
-    <center>Centered Text</center>
+    def test_cleanup_duplicates(self):
+        """Test du nettoyage des doublons."""
+        test_todos = [
+            {
+                "description": "Test task",
+                "priority": "Élevée",
+                "effort": "Moyen",
+                "file": "test.py"
+            },
+            {
+                "description": "Test task",
+                "priority": "Élevée",
+                "effort": "Moyen",
+                "file": "test.py"
+            }
+        ]
+        self.manager.add_todos(test_todos, "Test")
+        removed_count = self.manager.cleanup_duplicates()
+        self.assertEqual(removed_count, 1)
+        self.assertEqual(len(self.manager.get_todos()), 1)
+
+class TestIntegration(unittest.TestCase):
+    """Tests d'intégration pour l'ensemble du système."""
     
-    <!-- Form with accessibility issues -->
-    <form action="/submit" method="post">
-        <!-- Missing label for input -->
-        <input type="text" name="username">
-        <input type="password" name="password">
-        <button type="submit">Login</button>
-    </form>
+    def setUp(self):
+        """Initialisation avant chaque test."""
+        self.test_dir = "test_files"
+        self.todo_file = "test_todos.json"
+        os.makedirs(self.test_dir, exist_ok=True)
+        
+        # Initialisation des agents
+        self.gemini_agent = GeminiAgent()
+        self.todo_manager = TodoManager(self.todo_file)
     
-    <!-- Inline script - better to separate concerns -->
-    <script>
-        function validateForm() {
-            // Missing form validation
-            return true;
-        }
-    </script>
-</body>
-</html>
+    def tearDown(self):
+        """Nettoyage après chaque test."""
+        if os.path.exists(self.todo_file):
+            os.remove(self.todo_file)
+        if os.path.exists(self.test_dir):
+            for file in os.listdir(self.test_dir):
+                os.remove(os.path.join(self.test_dir, file))
+            os.rmdir(self.test_dir)
+    
+    def test_full_workflow(self):
+        """Test du workflow complet."""
+        # Création d'un fichier de test
+        test_file = os.path.join(self.test_dir, "test.py")
+        with open(test_file, 'w') as f:
+            f.write("""
+def process_data(data):
+    result = []
+    for item in data:
+        result.append(item * 2)
+    return result
 """)
-    
-    logger.info(f"Projet de test créé dans {test_dir}")
-    return test_dir
+        
+        # Analyse avec Gemini
+        suggestions = self.gemini_agent.suggest_refactoring(test_file)
+        self.assertIsNotNone(suggestions)
+        
+        # Extraction des TODOs
+        todos = self.gemini_agent.extract_todos_from_suggestions(suggestions)
+        self.assertIsInstance(todos, list)
+        
+        # Ajout des TODOs
+        self.todo_manager.add_todos(todos, "Gemini")
+        self.assertTrue(len(self.todo_manager.get_todos()) > 0)
+        
+        # Vérification des statistiques
+        stats = self.todo_manager.get_todo_statistics()
+        self.assertIn('total', stats)
+        self.assertIn('by_priority', stats)
+        self.assertIn('by_effort', stats)
 
-def run_test(test_project_path):
-    """
-    Exécute l'agent d'analyse de code sur le projet de test.
+def run_tests():
+    """Exécute tous les tests."""
+    # Création de la suite de tests
+    suite = unittest.TestSuite()
     
-    Args:
-        test_project_path (str): Chemin vers le projet de test
-    """
-    logger.info("Exécution du test de l'agent d'analyse de code...")
+    # Ajout des tests
+    suite.addTest(unittest.makeSuite(TestGeminiAgent))
+    suite.addTest(unittest.makeSuite(TestTodoManager))
+    suite.addTest(unittest.makeSuite(TestIntegration))
     
-    # Vérification de la présence du fichier .env
-    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-    if not os.path.exists(env_file):
-        logger.error(f"Le fichier .env n'existe pas. Veuillez créer un fichier .env basé sur .env.example")
-        return False
+    # Exécution des tests
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
     
-    # Exécution de l'agent sur le projet de test
-    cmd = f"python {MAIN_SCRIPT} {test_project_path} -v"
-    logger.info(f"Commande: {cmd}")
+    # Affichage des résultats
+    print("\nRésultats des tests:")
+    print(f"Tests exécutés: {result.testsRun}")
+    print(f"Tests réussis: {result.testsRun - len(result.failures) - len(result.errors)}")
+    print(f"Tests échoués: {len(result.failures)}")
+    print(f"Tests avec erreurs: {len(result.errors)}")
     
-    try:
-        import subprocess
-        result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
-        logger.info("Exécution réussie")
-        logger.info(result.stdout)
-        return True
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Erreur lors de l'exécution: {e}")
-        logger.error(e.stderr)
-        return False
+    return result.wasSuccessful()
 
-def verify_outputs():
-    """
-    Vérifie que les fichiers de sortie attendus ont été générés.
-    
-    Returns:
-        bool: True si tous les fichiers attendus sont présents, False sinon
-    """
-    logger.info("Vérification des fichiers de sortie...")
-    
-    # Liste des fichiers attendus
-    expected_files = [
-        "analysis_reports/calculator.py_claude_analysis.md",
-        "analysis_reports/user_manager.js_claude_analysis.md",
-        "analysis_reports/index.html_claude_analysis.md",
-        "refactoring_suggestions/calculator.py_chatgpt_review.md",
-        "refactoring_suggestions/user_manager.js_chatgpt_review.md",
-        "refactoring_suggestions/index.html_chatgpt_review.md",
-        "refactoring_suggestions/calculator.py_gemini_suggestions.md",
-        "refactoring_suggestions/user_manager.js_gemini_suggestions.md",
-        "refactoring_suggestions/index.html_gemini_suggestions.md",
-        "master_project_analysis_report.md",
-        "master_project_analysis_report.html",
-        "project_todo.json"
-    ]
-    
-    missing_files = []
-    for file in expected_files:
-        if not os.path.exists(file):
-            missing_files.append(file)
-    
-    if missing_files:
-        logger.error(f"Fichiers manquants: {', '.join(missing_files)}")
-        return False
-    
-    logger.info("Tous les fichiers attendus sont présents")
-    return True
-
-def cleanup_test_project(test_project_path):
-    """
-    Nettoie le projet de test.
-    
-    Args:
-        test_project_path (str): Chemin vers le projet de test
-    """
-    logger.info(f"Nettoyage du projet de test: {test_project_path}")
-    
-    try:
-        shutil.rmtree(test_project_path)
-        logger.info("Projet de test supprimé avec succès")
-    except Exception as e:
-        logger.error(f"Erreur lors de la suppression du projet de test: {str(e)}")
-
-if __name__ == "__main__":
-    logger.info("Début des tests de l'agent d'analyse de code multi-LLM")
-    
-    # Création du projet de test
-    test_project = create_test_project()
-    
-    # Exécution du test
-    success = run_test(test_project)
-    
-    # Vérification des sorties
-    if success:
-        outputs_ok = verify_outputs()
-        if outputs_ok:
-            logger.info("Test réussi: tous les fichiers attendus ont été générés")
-        else:
-            logger.error("Test échoué: certains fichiers attendus sont manquants")
-    
-    # Nettoyage (optionnel, commenter pour conserver le projet de test)
-    # cleanup_test_project(test_project)
-    
-    logger.info("Fin des tests")
+if __name__ == '__main__':
+    success = run_tests()
+    sys.exit(0 if success else 1)

@@ -9,10 +9,29 @@ Ce module est responsable des suggestions avancées et des idées d'amélioratio
 import os
 import logging
 import time
+import json
+import re
+from typing import List, Dict, Optional
 from google import genai
 from .claude_agent import ClaudeAgent
 
 logger = logging.getLogger('llm_code_agent.gemini_agent')
+
+# Constants
+LANGUAGE_MAP = {
+    '.py': 'Python',
+    '.js': 'JavaScript',
+    '.ts': 'TypeScript',
+    '.tsx': 'TypeScript React',
+    '.jsx': 'JavaScript React',
+    '.html': 'HTML',
+    '.css': 'CSS',
+    '.json': 'JSON',
+    '.md': 'Markdown'
+}
+
+MAX_RETRIES = 3
+INITIAL_RETRY_DELAY = 5
 
 class GeminiAgent:
     """
@@ -22,51 +41,27 @@ class GeminiAgent:
     
     def __init__(self):
         """Initialise l'agent Gemini avec la configuration nécessaire."""
-        self.api_key = os.getenv('GOOGLE_API_KEY')
-        if not self.api_key:
-            logger.error("Clé API Google non trouvée. Veuillez définir GOOGLE_API_KEY dans le fichier .env")
-            raise ValueError("Clé API Google manquante")
-        
+        self.api_key = self._get_api_key()
         self.client = genai.Client(api_key=self.api_key)
-        self.model = "gemini-2.0-flash"  # Güncel model adı
-        self.claude_fallback = ClaudeAgent()  # Initialisation du fallback Claude
+        self.model = "gemini-pro"
+        self.claude_fallback = ClaudeAgent()
         logger.info(f"Agent Gemini initialisé avec le modèle {self.model}")
     
-    def suggest_refactoring(self, code_content, claude_analysis, file_path):
-        """
-        Propose des suggestions avancées de refactoring et d'amélioration du code.
-        En cas d'échec de Gemini, utilise Claude comme fallback.
-        
-        Args:
-            code_content (str): Contenu du code à analyser
-            claude_analysis (str): Analyse préalable réalisée par Claude
-            file_path (str): Chemin du fichier analysé
-            
-        Returns:
-            str: Rapport de suggestions avancées au format Markdown
-        """
-        file_name = os.path.basename(file_path)
-        file_extension = os.path.splitext(file_name)[1].lower()
-        
-        logger.info(f"Génération de suggestions avancées pour {file_name} avec Gemini")
-        
-        # Détermination du langage de programmation
-        language_map = {
-            '.py': 'Python',
-            '.js': 'JavaScript',
-            '.ts': 'TypeScript',
-            '.tsx': 'TypeScript React',
-            '.jsx': 'JavaScript React',
-            '.html': 'HTML',
-            '.css': 'CSS',
-            '.json': 'JSON',
-            '.md': 'Markdown'
-        }
-        
-        language = language_map.get(file_extension, 'Code')
-        
-        # Construction du prompt pour Gemini
-        prompt = f"""
+    def _get_api_key(self) -> str:
+        """Récupère et valide la clé API Google."""
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            logger.error("Clé API Google non trouvée. Veuillez définir GOOGLE_API_KEY dans le fichier .env")
+            raise ValueError("Clé API Google manquante")
+        return api_key
+
+    def _get_language(self, file_extension: str) -> str:
+        """Détermine le langage de programmation à partir de l'extension du fichier."""
+        return LANGUAGE_MAP.get(file_extension.lower(), 'Code')
+
+    def _build_prompt(self, code_content: str, claude_analysis: str, file_name: str, language: str) -> str:
+        """Construit le prompt pour l'analyse de code."""
+        return f"""
 # Suggestions avancées de refactoring pour {language}
 
 Je vais te fournir le contenu d'un fichier {language} ainsi qu'une analyse préalable réalisée par Claude 3.
@@ -109,81 +104,84 @@ Termine par une liste de tâches TODO au format JSON pour faciliter l'intégrati
 Merci de fournir des suggestions avancées et innovantes pour améliorer ce code.
 """
 
-        # Appel à l'API Gemini
-        max_retries = 3
-        retry_delay = 5
-        
-        for attempt in range(max_retries):
+    def _handle_api_error(self, error: Exception, attempt: int, max_retries: int, retry_delay: int) -> None:
+        """Gère les erreurs d'API et les tentatives de retry."""
+        logger.warning(f"Tentative {attempt+1}/{max_retries} échouée: {str(error)}")
+        if attempt < max_retries - 1:
+            logger.info(f"Nouvelle tentative dans {retry_delay} secondes...")
+            time.sleep(retry_delay)
+        else:
+            logger.error(f"Échec de la génération de suggestions après {max_retries} tentatives")
+
+    def _generate_with_gemini(self, prompt: str) -> Optional[str]:
+        """Génère des suggestions avec Gemini Pro."""
+        for attempt in range(MAX_RETRIES):
             try:
                 response = self.client.models.generate_content(
                     model=self.model,
                     contents=prompt
                 )
-                
-                suggestions = response.text
-                
-                # Ajout d'un en-tête au rapport
-                header = f"""# Suggestions avancées de refactoring pour {file_name} par Gemini Pro
+                return response.text
+            except Exception as e:
+                retry_delay = INITIAL_RETRY_DELAY * (2 ** attempt)
+                self._handle_api_error(e, attempt, MAX_RETRIES, retry_delay)
+        return None
+
+    def _generate_with_claude(self, prompt: str, file_path: str) -> str:
+        """Génère des suggestions avec Claude en tant que fallback."""
+        try:
+            return self.claude_fallback.analyze_code(prompt, file_path)
+        except Exception as e:
+            logger.error(f"Échec du fallback avec Claude: {str(e)}")
+            raise
+
+    def _create_report_header(self, file_name: str, file_path: str, model: str) -> str:
+        """Crée l'en-tête du rapport d'analyse."""
+        return f"""# Suggestions avancées de refactoring pour {file_name} par {model}
 
 *Ce rapport a été généré automatiquement par l'agent d'analyse de code multi-LLM.*
 
 **Fichier analysé:** {file_path}  
 **Date d'analyse:** {time.strftime('%Y-%m-%d %H:%M:%S')}  
-**Modèle utilisé:** {self.model}
+**Modèle utilisé:** {model}
 
 ---
 
 """
-                
-                full_suggestions = header + suggestions
-                
-                logger.info(f"Suggestions avancées pour {file_name} générées avec succès")
-                return full_suggestions
-                
-            except Exception as e:
-                logger.warning(f"Tentative {attempt+1}/{max_retries} échouée: {str(e)}")
-                if attempt < max_retries - 1:
-                    logger.info(f"Nouvelle tentative dans {retry_delay} secondes...")
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # Backoff exponentiel
-                else:
-                    logger.error(f"Échec de la génération de suggestions après {max_retries} tentatives")
-                    logger.info("Utilisation de Claude comme fallback...")
-                    
-                    # Utilisation de Claude comme fallback
-                    try:
-                        fallback_prompt = f"""
-                        En tant qu'expert en refactoring de code, analyse ce fichier {language} et propose des suggestions avancées d'amélioration.
-                        Inclus des exemples de code, des niveaux d'effort et des priorités.
-                        
-                        Code à analyser:
-                        ```{language}
-                        {code_content}
-                        ```
-                        
-                        Analyse préalable:
-                        {claude_analysis[:1500]}... (analyse tronquée)
-                        """
-                        
-                        fallback_suggestions = self.claude_fallback.analyze_code(fallback_prompt)
-                        
-                        header = f"""# Suggestions avancées de refactoring pour {file_name} par Claude (Fallback)
 
-*Ce rapport a été généré automatiquement par l'agent d'analyse de code multi-LLM suite à un échec de Gemini.*
-
-**Fichier analysé:** {file_path}  
-**Date d'analyse:** {time.strftime('%Y-%m-%d %H:%M:%S')}  
-**Modèle utilisé:** Claude (Fallback)
-
----
-
-"""
-                        
-                        return header + fallback_suggestions
-                        
-                    except Exception as fallback_error:
-                        logger.error(f"Échec du fallback avec Claude: {str(fallback_error)}")
-                        return f"""# Erreur de génération de suggestions pour {file_name}
+    def suggest_refactoring(self, code_content: str, claude_analysis: str, file_path: str) -> str:
+        """
+        Propose des suggestions avancées de refactoring et d'amélioration du code.
+        En cas d'échec de Gemini, utilise Claude comme fallback.
+        
+        Args:
+            code_content (str): Contenu du code à analyser
+            claude_analysis (str): Analyse préalable réalisée par Claude
+            file_path (str): Chemin du fichier analysé
+            
+        Returns:
+            str: Rapport de suggestions avancées au format Markdown
+        """
+        file_name = os.path.basename(file_path)
+        file_extension = os.path.splitext(file_name)[1]
+        language = self._get_language(file_extension)
+        
+        logger.info(f"Génération de suggestions avancées pour {file_name} avec Gemini")
+        
+        prompt = self._build_prompt(code_content, claude_analysis, file_name, language)
+        suggestions = self._generate_with_gemini(prompt)
+        
+        if suggestions:
+            header = self._create_report_header(file_name, file_path, self.model)
+            return header + suggestions
+        
+        logger.info("Utilisation de Claude comme fallback...")
+        try:
+            fallback_suggestions = self._generate_with_claude(prompt, file_path)
+            header = self._create_report_header(file_name, file_path, "Claude (Fallback)")
+            return header + fallback_suggestions
+        except Exception as e:
+            return f"""# Erreur de génération de suggestions pour {file_name}
 
 Une erreur s'est produite lors de la génération de suggestions avec Gemini Pro et le fallback Claude:
 
@@ -194,7 +192,7 @@ Une erreur s'est produite lors de la génération de suggestions avec Gemini Pro
 Veuillez vérifier votre connexion internet et vos clés API, puis réessayer.
 """
 
-    def extract_todos_from_suggestions(self, suggestions_content):
+    def extract_todos_from_suggestions(self, suggestions_content: str) -> List[Dict]:
         """
         Extrait les tâches TODO à partir du rapport de suggestions.
         
@@ -206,72 +204,92 @@ Veuillez vérifier votre connexion internet et vos clés API, puis réessayer.
         """
         todos = []
         
-        # Recherche d'un bloc JSON contenant des TODOs
-        import re
-        json_pattern = r'```json\s*([\s\S]*?)\s*```'
-        json_matches = re.findall(json_pattern, suggestions_content)
+        # Extraction depuis JSON
+        json_todos = self._extract_todos_from_json(suggestions_content)
+        if json_todos:
+            todos.extend(json_todos)
+            return todos
         
-        if json_matches:
-            for json_str in json_matches:
-                try:
-                    # Tentative de parsing du JSON
-                    import json
-                    todo_data = json.loads(json_str)
-                    
-                    # Si c'est une liste, on l'ajoute directement
-                    if isinstance(todo_data, list):
-                        todos.extend(todo_data)
-                    # Si c'est un dictionnaire avec une clé "todos", on utilise cette liste
-                    elif isinstance(todo_data, dict) and "todos" in todo_data:
-                        todos.extend(todo_data["todos"])
-                except json.JSONDecodeError:
-                    logger.warning("Impossible de parser le JSON des TODOs")
-        
-        # Si aucun JSON n'est trouvé, on extrait les TODOs à partir du texte
-        if not todos:
-            # Analyse simple basée sur les titres et les mentions de priorité
-            lines = suggestions_content.split('\n')
-            current_todo = None
-            
-            for line in lines:
-                # Détection des titres qui pourraient indiquer une tâche
-                if line.startswith('##') and ('todo' in line.lower() or 'tâche' in line.lower() or 'amélioration' in line.lower()):
-                    # Sauvegarder la tâche précédente si elle existe
-                    if current_todo:
-                        todos.append(current_todo)
-                    
-                    # Commencer une nouvelle tâche
-                    current_todo = {
-                        'description': line.lstrip('#').strip(),
-                        'priority': 'Moyenne',
-                        'effort': 'Moyen'
-                    }
-                
-                # Détection de la priorité
-                elif current_todo and ('priorité' in line.lower() or 'priority' in line.lower()):
-                    if 'critique' in line.lower() or 'critical' in line.lower():
-                        current_todo['priority'] = 'Critique'
-                    elif 'élevée' in line.lower() or 'high' in line.lower():
-                        current_todo['priority'] = 'Élevée'
-                    elif 'moyenne' in line.lower() or 'medium' in line.lower():
-                        current_todo['priority'] = 'Moyenne'
-                    elif 'faible' in line.lower() or 'low' in line.lower():
-                        current_todo['priority'] = 'Faible'
-                
-                # Détection du niveau d'effort
-                elif current_todo and ('effort' in line.lower()):
-                    if 'élevé' in line.lower() or 'high' in line.lower():
-                        current_todo['effort'] = 'Élevé'
-                    elif 'moyen' in line.lower() or 'medium' in line.lower():
-                        current_todo['effort'] = 'Moyen'
-                    elif 'faible' in line.lower() or 'low' in line.lower():
-                        current_todo['effort'] = 'Faible'
-            
-            # Ajouter la dernière tâche si elle existe
-            if current_todo:
-                todos.append(current_todo)
+        # Extraction depuis texte
+        text_todos = self._extract_todos_from_text(suggestions_content)
+        todos.extend(text_todos)
         
         return todos
+
+    def _extract_todos_from_json(self, content: str) -> List[Dict]:
+        """Extrait les TODOs depuis un bloc JSON."""
+        json_pattern = r'```json\s*([\s\S]*?)\s*```'
+        json_matches = re.findall(json_pattern, content)
+        
+        todos = []
+        for json_str in json_matches:
+            try:
+                todo_data = json.loads(json_str)
+                if isinstance(todo_data, list):
+                    todos.extend(todo_data)
+                elif isinstance(todo_data, dict) and "todos" in todo_data:
+                    todos.extend(todo_data["todos"])
+            except json.JSONDecodeError:
+                logger.warning("Impossible de parser le JSON des TODOs")
+        
+        return todos
+
+    def _extract_todos_from_text(self, content: str) -> List[Dict]:
+        """Extrait les TODOs depuis le texte du rapport."""
+        todos = []
+        lines = content.split('\n')
+        current_todo = None
+        
+        for line in lines:
+            if self._is_todo_title(line):
+                if current_todo:
+                    todos.append(current_todo)
+                current_todo = self._create_todo_from_title(line)
+            elif current_todo:
+                self._update_todo_priority(current_todo, line)
+                self._update_todo_effort(current_todo, line)
+        
+        if current_todo:
+            todos.append(current_todo)
+        
+        return todos
+
+    def _is_todo_title(self, line: str) -> bool:
+        """Vérifie si une ligne est un titre de TODO."""
+        return (line.startswith('##') and 
+                any(keyword in line.lower() for keyword in ['todo', 'tâche', 'amélioration']))
+
+    def _create_todo_from_title(self, title: str) -> Dict:
+        """Crée un nouveau TODO à partir d'un titre."""
+        return {
+            'description': title.lstrip('#').strip(),
+            'priority': 'Moyenne',
+            'effort': 'Moyen'
+        }
+
+    def _update_todo_priority(self, todo: Dict, line: str) -> None:
+        """Met à jour la priorité d'un TODO."""
+        line_lower = line.lower()
+        if 'priorité' in line_lower or 'priority' in line_lower:
+            if 'critique' in line_lower or 'critical' in line_lower:
+                todo['priority'] = 'Critique'
+            elif 'élevée' in line_lower or 'high' in line_lower:
+                todo['priority'] = 'Élevée'
+            elif 'moyenne' in line_lower or 'medium' in line_lower:
+                todo['priority'] = 'Moyenne'
+            elif 'faible' in line_lower or 'low' in line_lower:
+                todo['priority'] = 'Faible'
+
+    def _update_todo_effort(self, todo: Dict, line: str) -> None:
+        """Met à jour le niveau d'effort d'un TODO."""
+        line_lower = line.lower()
+        if 'effort' in line_lower:
+            if 'élevé' in line_lower or 'high' in line_lower:
+                todo['effort'] = 'Élevé'
+            elif 'moyen' in line_lower or 'medium' in line_lower:
+                todo['effort'] = 'Moyen'
+            elif 'faible' in line_lower or 'low' in line_lower:
+                todo['effort'] = 'Faible'
 
 # Test unitaire simple si exécuté directement
 if __name__ == "__main__":

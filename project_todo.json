@@ -1,0 +1,1422 @@
+[
+  {
+    "description": "La méthode `extract_todos_from_suggestions` est assez longue et complexe. Elle mériterait d'être décomposée en sous-fonctions plus petites et spécialisées pour améliorer la lisibilité et la maintenabilité.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "L'analyse des TODOs basée sur le texte est assez fragile et pourrait générer des faux positifs ou manquer certaines tâches. Une approche plus robuste serait de standardiser le format des TODOs dans les suggestions pour faciliter leur extraction.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Dans la méthode `suggest_refactoring`, le code de gestion des erreurs et des nouvelles tentatives est répété. Il serait plus efficace et maintenable d'extraire cette logique dans une fonction utilitaire séparée.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Les expressions régulières dans `extract_todos_from_suggestions` pourraient être clarifiées avec des commentaires expliquant ce qu'elles recherchent exactement.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "La méthode `extract_todos_from_suggestions` pourrait être optimisée en utilisant des expressions régulières plus efficaces ou en améliorant l'algorithme d'analyse du texte.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Décomposer la méthode `extract_todos_from_suggestions` en sous-fonctions plus petites et spécialisées, par exemple `extract_todos_from_json` et `extract_todos_from_text`.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Envisager d'utiliser une bibliothèque spécialisée comme `pyjson5` pour parser le JSON des TODOs de manière plus robuste et efficace.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Optimiser les expressions régulières utilisées pour extraire les TODOs du texte.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "[Priorité Élevée]** Refactoriser la méthode `extract_todos_from_suggestions` en sous-fonctions plus petites et spécialisées pour améliorer la lisibilité et la maintenabilité.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Extraire la logique d'extraction des TODOs depuis le JSON dans une fonction séparée.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Extraire la logique d'extraction des TODOs depuis le texte dans une fonction séparée.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Utiliser cette fonction dans `suggest_refactoring` pour gérer les erreurs et les nouvelles tentatives de manière plus concise et réutilisable.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "Remplacer la logique de parsing JSON manuelle dans `extract_todos_from_suggestions` par l'utilisation de `pyjson5`.",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748959909_13",
+    "timestamp": 1748959909,
+    "completed": false
+  },
+  {
+    "description": "La méthode `_extract_todos_from_text` est assez longue et complexe. Il serait préférable de la découper en sous-méthodes plus petites et plus faciles à comprendre et à maintenir.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748959993_19",
+    "timestamp": 1748959993,
+    "completed": false
+  },
+  {
+    "description": "L'utilisation de `isinstance` pour vérifier le type des données JSON dans `_extract_todos_from_text` n'est pas idéale. Il serait préférable de définir un schéma JSON et de valider les données par rapport à ce schéma.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748959993_19",
+    "timestamp": 1748959993,
+    "completed": false
+  },
+  {
+    "description": "Dans la méthode `save_todos`, la boucle `for todo in new_todos` pourrait être optimisée en utilisant une compréhension de liste ou de dictionnaire.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748959993_19",
+    "timestamp": 1748959993,
+    "completed": false
+  },
+  {
+    "description": "Dans la méthode `_extract_todos_from_text`, il y a plusieurs occurrences de `line_lower = line.lower()`. Il serait plus efficace de convertir tout le texte en minuscules une seule fois au début de la méthode.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748959993_19",
+    "timestamp": 1748959993,
+    "completed": false
+  },
+  {
+    "description": "La méthode `_extract_todos_from_text` est assez longue et complexe, ce qui peut rendre le code difficile à lire et à maintenir. Il serait préférable de la découper en sous-méthodes plus petites et plus faciles à comprendre.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748959993_19",
+    "timestamp": 1748959993,
+    "completed": false
+  },
+  {
+    "description": "[Priorité: Moyenne] Refactoriser la méthode `_extract_todos_from_text` pour la découper en sous-méthodes plus petites et plus faciles à comprendre et à maintenir. Cela améliorera la lisibilité et la maintenabilité du code.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748959993_19",
+    "timestamp": 1748959993,
+    "completed": false
+  },
+  {
+    "description": "Refactoring de la gestion des chemins de fichiers** [Priorité: Moyenne]",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "html_exporter.py",
+    "source": "Claude",
+    "id": "todo_1748960063_20",
+    "timestamp": 1748960063,
+    "completed": false
+  },
+  {
+    "description": "[Priorité Moyenne] Refactorer la fonction `review_code` en sous-fonctions pour améliorer la lisibilité et la maintenabilité.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "chatgpt_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960158_22",
+    "timestamp": 1748960158,
+    "completed": false
+  },
+  {
+    "description": "Appliquez les refactorisations suggérées ci-dessus pour améliorer la lisibilité.",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "chatgpt_agent.py",
+    "source": "ChatGPT",
+    "id": "todo_1748960158_22",
+    "timestamp": 1748960158,
+    "completed": false
+  },
+  {
+    "description": "Pas de suggestions majeures de refactoring, le code est déjà lisible et bien structuré.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "test_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960299_28",
+    "timestamp": 1748960299,
+    "completed": false
+  },
+  {
+    "description": "Optimiser la fonction `verify_outputs` en utilisant une boucle `for` avec `os.path.join` pour générer les chemins de fichiers attendus.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "test_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960299_28",
+    "timestamp": 1748960299,
+    "completed": false
+  },
+  {
+    "description": "Priorité : Faible",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "test_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960299_28",
+    "timestamp": 1748960299,
+    "completed": false
+  },
+  {
+    "description": "Raison : Amélioration de la maintenabilité et légère optimisation",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "test_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960299_28",
+    "timestamp": 1748960299,
+    "completed": false
+  },
+  {
+    "description": "Priorité : Moyen",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "test_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960299_28",
+    "timestamp": 1748960299,
+    "completed": false
+  },
+  {
+    "description": "Raison : Renforcement de la sécurité en évitant les risques d'injection de commande",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "test_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960299_28",
+    "timestamp": 1748960299,
+    "completed": false
+  },
+  {
+    "description": "Refactorer la vérification de l'extension dans une fonction séparée. (Priorité: Faible)",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "file_scanner.py",
+    "source": "Claude",
+    "id": "todo_1748960612_29",
+    "timestamp": 1748960612,
+    "completed": false
+  },
+  {
+    "description": "La méthode `suggest_refactoring` est assez longue et pourrait être divisée en sous-méthodes pour améliorer la lisibilité et la maintenabilité.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Le dictionnaire `language_map` pourrait être défini comme une constante en dehors de la méthode `suggest_refactoring` pour éviter de le recréer à chaque appel.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "La méthode `extract_todos_from_suggestions` est assez complexe avec différentes stratégies d'extraction. Des commentaires supplémentaires pourraient aider à clarifier son fonctionnement.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Quelques commentaires inline supplémentaires pourraient être ajoutés pour expliquer certaines parties complexes du code, comme la logique de retry ou l'extraction des TODOs.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Certaines parties du code, comme la logique de retry ou l'extraction des TODOs, pourraient être extraites dans des fonctions utilitaires réutilisables.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Extraire les prompts Gemini et Claude dans des variables séparées ou des fichiers de template pour améliorer la lisibilité de la méthode `suggest_refactoring`.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Diviser la méthode `suggest_refactoring` en sous-méthodes plus petites et focalisées (ex: `generate_gemini_suggestions`, `generate_claude_suggestions`, `format_suggestions`).",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Définir le dictionnaire `language_map` comme une constante en dehors de la méthode `suggest_refactoring` pour éviter de le recréer à chaque appel.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Refactorer la méthode `suggest_refactoring`** (Priorité: Élevée)",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Ajouter des commentaires inline pour expliquer les parties complexes du code, comme la logique de retry ou l'extraction des TODOs.",
+    "priority": "Faible",
+    "effort": "Élevé",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "Problème**: La méthode `suggest_refactoring` est longue et complexe.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "gemini_agent.py",
+    "source": "ChatGPT",
+    "id": "todo_1748960709_40",
+    "timestamp": 1748960709,
+    "completed": false
+  },
+  {
+    "description": "La méthode `_extract_todos_from_text` est assez longue et complexe. Il serait préférable de la découper en sous-méthodes plus petites et plus faciles à comprendre et à maintenir.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "L'utilisation de `isinstance` pour vérifier le type des données JSON dans `_extract_todos_from_text` n'est pas idéale. Il serait préférable de définir un schéma JSON et de valider les données par rapport à ce schéma.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "Dans la méthode `save_todos`, la boucle `for todo in new_todos` pourrait être remplacée par une compréhension de liste pour plus de concision et de lisibilité.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "Dans la méthode `_extract_todos_from_text`, les conditions `if in_todo_section or any(keyword in line_lower for keyword in [...])` pourraient être combinées en une seule condition pour éviter la duplication.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "Les commentaires sont généralement suffisants et utiles, mais certaines méthodes complexes comme `_extract_todos_from_text` pourraient bénéficier de commentaires plus détaillés expliquant la logique.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "[Priorité: Élevée]** Refactoriser la méthode `_extract_todos_from_text` pour la découper en sous-méthodes plus petites et plus faciles à comprendre et à maintenir. Cela améliorera grandement la lisibilité et la maintenabilité du code.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "La méthode `_extract_todos_from_text` est longue et complexe.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "todo_manager.py",
+    "source": "ChatGPT",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "Boucle `for` dans `save_todos` pourrait être remplacée par une compréhension de liste.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "ChatGPT",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "description": "Conditions dans `_extract_todos_from_text` pourraient être combinées.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "ChatGPT",
+    "id": "todo_1748960847_49",
+    "timestamp": 1748960847,
+    "completed": false
+  },
+  {
+    "task": "Refactor create_test_project using pathlib and a data structure for test files",
+    "effort": "low",
+    "priority": "high",
+    "file": "test_agent.py",
+    "source": "Gemini",
+    "id": "todo_1748960962_56",
+    "timestamp": 1748960962,
+    "completed": false
+  },
+  {
+    "task": "Refactor run_test using subprocess.run with list of arguments and sys.executable",
+    "effort": "medium",
+    "priority": "high",
+    "file": "test_agent.py",
+    "source": "Gemini",
+    "id": "todo_1748960962_56",
+    "timestamp": 1748960962,
+    "completed": false
+  },
+  {
+    "task": "Refactor verify_outputs using pathlib",
+    "effort": "low",
+    "priority": "high",
+    "file": "test_agent.py",
+    "source": "Gemini",
+    "id": "todo_1748960962_56",
+    "timestamp": 1748960962,
+    "completed": false
+  },
+  {
+    "task": "Implement configuration file using configparser",
+    "effort": "medium",
+    "priority": "medium",
+    "file": "test_agent.py",
+    "source": "Gemini",
+    "id": "todo_1748960962_56",
+    "timestamp": 1748960962,
+    "completed": false
+  },
+  {
+    "task": "Extract file creation logic into separate functions",
+    "effort": "medium",
+    "priority": "medium",
+    "file": "test_agent.py",
+    "source": "Gemini",
+    "id": "todo_1748960962_56",
+    "timestamp": 1748960962,
+    "completed": false
+  },
+  {
+    "task": "Migrate to pytest",
+    "effort": "medium",
+    "priority": "high",
+    "file": "test_agent.py",
+    "source": "Gemini",
+    "id": "todo_1748960962_56",
+    "timestamp": 1748960962,
+    "completed": false
+  },
+  {
+    "task": "Use pytest fixtures for test project management",
+    "effort": "low",
+    "priority": "high",
+    "file": "test_agent.py",
+    "source": "Gemini",
+    "id": "todo_1748960962_56",
+    "timestamp": 1748960962,
+    "completed": false
+  },
+  {
+    "id": 1,
+    "title": "Ajouter une table des matières dynamique au README",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 2,
+    "title": "Ajouter des badges dynamiques pour le statut du projet",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 3,
+    "title": "Créer et intégrer un diagramme d'architecture du projet",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 4,
+    "title": "Ajouter des liens vers la documentation des APIs LLM",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 5,
+    "title": "Ajouter une section 'Contribution' détaillée",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 6,
+    "title": "Améliorer la section Sécurité",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 7,
+    "title": "Implémenter le support des fichiers .gitignore",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 8,
+    "title": "Ajouter un système de plugins pour les LLMs",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "id": 9,
+    "title": "Ajouter des tests unitaires et d'intégration",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "README.md",
+    "source": "Gemini",
+    "timestamp": 1748961121,
+    "completed": false
+  },
+  {
+    "description": "Refactoring du code d'écriture des rapports** (Priorité: Faible)",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "llm_code_agent.py",
+    "source": "Claude",
+    "id": "todo_1748961206_66",
+    "timestamp": 1748961206,
+    "completed": false
+  },
+  {
+    "task": "Implémenter la validation du chemin du répertoire pour éviter la traversée de répertoire.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Modulariser la gestion des extensions de fichiers en utilisant un dictionnaire.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Optimiser les performances en évitant les opérations d'I/O redondantes.",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Moderniser le code en utilisant `pathlib.Path` et en ajoutant des *type hints*.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Améliorer la testabilité en utilisant l'injection de dépendances.",
+    "priority": "Élevée",
+    "effort": "Élevé",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Ajouter une fonctionnalité pour lire les extensions supportées et les dossiers ignorés depuis un fichier de configuration.",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Implémenter le support des expressions régulières pour filtrer les fichiers.",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Implémenter la gestion des exclusions via un fichier `.llmagentignore`.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Créer une interface pour le `FileScanner` et envisager différentes implémentations.",
+    "priority": "Faible",
+    "effort": "Élevé",
+    "assignee": "Architecte Logiciel",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "task": "Mettre en place des tests unitaires complets avec des mocks.",
+    "priority": "Élevée",
+    "effort": "Élevé",
+    "assignee": "Dev Team",
+    "file": "file_scanner.py",
+    "source": "Gemini",
+    "id": "todo_1748961294_76",
+    "timestamp": 1748961294,
+    "completed": false
+  },
+  {
+    "description": "La méthode `suggest_refactoring` est assez longue et pourrait être découpée en sous-méthodes pour améliorer la lisibilité et la maintenabilité.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748961386_82",
+    "timestamp": 1748961386,
+    "completed": false
+  },
+  {
+    "description": "Découper la méthode `suggest_refactoring` en sous-méthodes plus petites et spécifiques.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748961386_82",
+    "timestamp": 1748961386,
+    "completed": false
+  },
+  {
+    "description": "Définir le dictionnaire `language_map` comme une constante en dehors de la méthode `suggest_refactoring`.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748961386_82",
+    "timestamp": 1748961386,
+    "completed": false
+  },
+  {
+    "description": "Refactorer la méthode `suggest_refactoring` en sous-méthodes plus petites et spécifiques.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "Claude",
+    "id": "todo_1748961386_82",
+    "timestamp": 1748961386,
+    "completed": false
+  },
+  {
+    "description": "Problème**: La méthode `suggest_refactoring` est longue et complexe.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "gemini_agent.py",
+    "source": "ChatGPT",
+    "id": "todo_1748961386_82",
+    "timestamp": 1748961386,
+    "completed": false
+  },
+  {
+    "description": "Élevé**: Découper la méthode `suggest_refactoring` en sous-méthodes.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "gemini_agent.py",
+    "source": "ChatGPT",
+    "id": "todo_1748961386_82",
+    "timestamp": 1748961386,
+    "completed": false
+  },
+  {
+    "description": "La méthode `_extract_todos_from_text` est assez longue et complexe. Il serait préférable de la diviser en sous-méthodes plus petites et plus faciles à comprendre.",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748961475_87",
+    "timestamp": 1748961475,
+    "completed": false
+  },
+  {
+    "description": "La logique de tri des tâches par priorité est répétée dans `get_top_todos` et `export_todos_as_markdown`. Il serait préférable de l'extraire dans une méthode séparée.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748961475_87",
+    "timestamp": 1748961475,
+    "completed": false
+  },
+  {
+    "description": "Diviser la méthode `_extract_todos_from_text` en sous-méthodes plus petites et plus faciles à comprendre.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748961475_87",
+    "timestamp": 1748961475,
+    "completed": false
+  },
+  {
+    "description": "[Priorité: Élevée] Diviser la méthode `_extract_todos_from_text` en sous-méthodes plus petites et plus faciles à comprendre.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "todo_manager.py",
+    "source": "Claude",
+    "id": "todo_1748961475_87",
+    "timestamp": 1748961475,
+    "completed": false
+  },
+  {
+    "description": "Complexité de la Méthode `_extract_todos_from_text`**",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "todo_manager.py",
+    "source": "ChatGPT",
+    "id": "todo_1748961475_87",
+    "timestamp": 1748961475,
+    "completed": false
+  },
+  {
+    "description": "Refactorer le code de gestion des chemins de fichiers dans une méthode séparée.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "html_exporter.py",
+    "source": "Claude",
+    "id": "todo_1748961579_90",
+    "timestamp": 1748961579,
+    "completed": false
+  },
+  {
+    "description": "`md_path.with_suffix('.html')`:  Création du nom du fichier HTML de sortie de manière plus élégante.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "html_exporter.py",
+    "source": "Gemini",
+    "id": "todo_1748961579_90",
+    "timestamp": 1748961579,
+    "completed": false
+  },
+  {
+    "description": "Construction des chemins de manière plus lisible avec l'opérateur `/` : `html_dir / md_file.with_suffix('.html').name`.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "html_exporter.py",
+    "source": "Gemini",
+    "id": "todo_1748961579_90",
+    "timestamp": 1748961579,
+    "completed": false
+  },
+  {
+    "description": "Refactorer la méthode `review_code` en sous-méthodes plus petites et réutilisables. (Priorité : Moyen)",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "chatgpt_agent.py",
+    "source": "Claude",
+    "id": "todo_1748961680_91",
+    "timestamp": 1748961680,
+    "completed": false
+  },
+  {
+    "description": "[Priorité Moyenne] Refactorer la fonction `analyze_code` en sous-fonctions plus petites pour améliorer la lisibilité et la maintenabilité.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "claude_agent.py",
+    "source": "Claude",
+    "id": "todo_1748961747_92",
+    "timestamp": 1748961747,
+    "completed": false
+  },
+  {
+    "description": "Refactoriser la méthode `request` de `AuthorizedHttp` pour extraire la logique de rafraîchissement des informations d'identification dans une méthode séparée.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "google_auth_httplib2.py",
+    "source": "Claude",
+    "id": "todo_1748961820_93",
+    "timestamp": 1748961820,
+    "completed": false
+  },
+  {
+    "task": "Découper le fichier en sous-modules par fonctionnalité principale",
+    "priority": "Élevée",
+    "effort": "Élevé",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Utiliser des paquets `namespace` pour une distribution plus granulaire",
+    "priority": "Moyenne",
+    "effort": "Élevé",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Utiliser le pattern `try...except ImportError` pour la gestion des dépendances optionnelles",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Optimiser les conditions basées sur `sys.version_info`",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Utiliser `functools.lru_cache` pour mémoïser les fonctions coûteuses",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Remplacer l'implémentation personnalisée de `TypeAliasType` avec une implémentation basée sur `types.GenericAlias` (si possible)",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Écrire des tests unitaires complets pour toutes les classes et fonctions",
+    "priority": "Critique",
+    "effort": "Élevé",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Utiliser `unittest.mock` pour mocker les dépendances externes (comme `sys.version_info`) lors des tests",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Utiliser des tests de type avec `mypy` ou `pyright`",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Explorer et implémenter de nouvelles fonctionnalités de typage proposées dans les PEP récentes (PEP 747, PEP 728, etc.)",
+    "priority": "Moyenne",
+    "effort": "Variable",
+    "file": "typing_extensions.py",
+    "source": "Gemini",
+    "id": "todo_1748961890_103",
+    "timestamp": 1748961890,
+    "completed": false
+  },
+  {
+    "task": "Refactor PyAsn1Error to use message and context attributes and be an abstract class",
+    "priority": "High",
+    "effort": "Medium",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Modernize exception context handling to use dedicated objects and exception chaining",
+    "priority": "High",
+    "effort": "Medium",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Simplify Unicode exception hierarchy and ensure seamless integration with Python's UnicodeError",
+    "priority": "Medium",
+    "effort": "Medium",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Introduce unique error codes for each exception type",
+    "priority": "High",
+    "effort": "Medium",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Add pyasn1 version information to the error context",
+    "priority": "Medium",
+    "effort": "Low",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Migrate to dataclasses for exception classes",
+    "priority": "Medium",
+    "effort": "Medium",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Improve testability with custom assertion methods and unique error code validation",
+    "priority": "High",
+    "effort": "Medium",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Implement centralized error logging",
+    "priority": "Low",
+    "effort": "Medium",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Add support for internationalization (i18n)",
+    "priority": "Low",
+    "effort": "High",
+    "file": "error.py",
+    "source": "Gemini",
+    "id": "todo_1748961952_112",
+    "timestamp": 1748961952,
+    "completed": false
+  },
+  {
+    "task": "Refactor version management with importlib.metadata",
+    "effort": "Medium",
+    "priority": "Medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962012_116",
+    "timestamp": 1748962012,
+    "completed": false
+  },
+  {
+    "task": "Integrate with version control tools (e.g., setuptools_scm)",
+    "effort": "High",
+    "priority": "High",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962012_116",
+    "timestamp": 1748962012,
+    "completed": false
+  },
+  {
+    "task": "Add unit tests for version handling",
+    "effort": "Low",
+    "priority": "Medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962012_116",
+    "timestamp": 1748962012,
+    "completed": false
+  },
+  {
+    "task": "Improve documentation of __init__.py",
+    "effort": "Low",
+    "priority": "Low",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962012_116",
+    "timestamp": 1748962012,
+    "completed": false
+  },
+  {
+    "description": "La convention de nommage avec un underscore préfixe (`_`) indique que la variable est considérée comme \"privée\" ou à usage interne.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "__init__.py",
+    "source": "Claude",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "description": "Les conventions de nommage sont respectées avec l'utilisation d'un underscore préfixe pour la variable \"privée\".",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "__init__.py",
+    "source": "Claude",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "description": "Analyse**: La variable `_MISSING` est définie comme une sentinelle pour les arguments manquants. L'utilisation de `object()` comme valeur sentinelle est une pratique courante en Python. Le préfixe underscore (`_`) indique que la variable est destinée à un usage interne, ce qui est conforme aux conventions de nommage.",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "__init__.py",
+    "source": "ChatGPT",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "task": "Improve documentation of _MISSING sentinel value",
+    "effort": "low",
+    "priority": "medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "task": "Introduce MissingType class for the sentinel",
+    "effort": "medium",
+    "priority": "medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "task": "Add typing.Final to _MISSING (if Python version allows)",
+    "effort": "low",
+    "priority": "low",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "task": "Analyze the 'compat' package and identify modularization opportunities",
+    "effort": "high",
+    "priority": "medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "task": "Create a test for the MissingType sentinel",
+    "effort": "low",
+    "priority": "medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "task": "Document the project's compatibility strategy",
+    "effort": "medium",
+    "priority": "low",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962132_125",
+    "timestamp": 1748962132,
+    "completed": false
+  },
+  {
+    "task": "Améliorer la lisibilité et la maintenabilité en utilisant un nom de variable plus descriptif et une condition `if` plus explicite.",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "file": "integer.py",
+    "source": "Gemini",
+    "id": "todo_1748962211_132",
+    "timestamp": 1748962211,
+    "completed": false
+  },
+  {
+    "task": "Optimiser les performances avec caching en utilisant `functools.lru_cache` pour les longueurs de bits.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "integer.py",
+    "source": "Gemini",
+    "id": "todo_1748962211_132",
+    "timestamp": 1748962211,
+    "completed": false
+  },
+  {
+    "task": "Moderniser le code avec `math.ceil` pour le calcul du nombre d'octets.",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "file": "integer.py",
+    "source": "Gemini",
+    "id": "todo_1748962211_132",
+    "timestamp": 1748962211,
+    "completed": false
+  },
+  {
+    "task": "Ajouter une gestion des erreurs et une validation des entrées pour s'assurer que la valeur est un entier.",
+    "priority": "Élevée",
+    "effort": "Faible",
+    "file": "integer.py",
+    "source": "Gemini",
+    "id": "todo_1748962211_132",
+    "timestamp": 1748962211,
+    "completed": false
+  },
+  {
+    "task": "Modulariser le code en séparant la logique de calcul de la longueur en octets dans une fonction distincte (à évaluer).",
+    "priority": "Faible",
+    "effort": "Moyen",
+    "file": "integer.py",
+    "source": "Gemini",
+    "id": "todo_1748962211_132",
+    "timestamp": 1748962211,
+    "completed": false
+  },
+  {
+    "task": "Améliorer la testabilité en écrivant des tests unitaires.",
+    "priority": "Élevée",
+    "effort": "Moyen",
+    "file": "integer.py",
+    "source": "Gemini",
+    "id": "todo_1748962211_132",
+    "timestamp": 1748962211,
+    "completed": false
+  },
+  {
+    "task": "Ajouter une fonctionnalité pour supporter l'endianness (big ou little).",
+    "priority": "Moyenne",
+    "effort": "Faible",
+    "file": "integer.py",
+    "source": "Gemini",
+    "id": "todo_1748962211_132",
+    "timestamp": 1748962211,
+    "completed": false
+  },
+  {
+    "description": "Les classes `AbstractScalarPayloadDecoder`, `BitStringPayloadDecoder`, `SequenceOrSetPayloadDecoder`, `SequenceOfOrSetOfPayloadDecoder` et `ChoicePayloadDecoder` pourraient être extraites dans des modules séparés pour améliorer la réutilisabilité.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "decoder.py",
+    "source": "Claude",
+    "id": "todo_1748962417_134",
+    "timestamp": 1748962417,
+    "completed": false
+  },
+  {
+    "description": "Optimisation des boucles** : Dans les classes `SequenceOrSetPayloadDecoder` et `SequenceOfOrSetOfPayloadDecoder`, l'utilisation de `for` pourrait être optimisée en utilisant des compréhensions de liste ou des générateurs si applicable.",
+    "priority": "Moyenne",
+    "effort": "Moyen",
+    "file": "decoder.py",
+    "source": "ChatGPT",
+    "id": "todo_1748962417_134",
+    "timestamp": 1748962417,
+    "completed": false
+  },
+  {
+    "task": "Exposer les modules decoder et encoder via __init__.py",
+    "priority": "medium",
+    "effort": "low",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962458_141",
+    "timestamp": 1748962458,
+    "completed": false
+  },
+  {
+    "task": "Implémenter la configuration globale du codec (set_default_options, get_default_options)",
+    "priority": "medium",
+    "effort": "medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962458_141",
+    "timestamp": 1748962458,
+    "completed": false
+  },
+  {
+    "task": "Définir des exceptions personnalisées (NativeCodecError, EncodingError, DecodingError)",
+    "priority": "high",
+    "effort": "medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962458_141",
+    "timestamp": 1748962458,
+    "completed": false
+  },
+  {
+    "task": "Ajouter les informations de version, auteur et licence dans __init__.py",
+    "priority": "medium",
+    "effort": "low",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962458_141",
+    "timestamp": 1748962458,
+    "completed": false
+  },
+  {
+    "task": "Intégrer un système de logging basique",
+    "priority": "low",
+    "effort": "medium",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962458_141",
+    "timestamp": 1748962458,
+    "completed": false
+  },
+  {
+    "task": "Développer des tests unitaires exhaustifs",
+    "priority": "high",
+    "effort": "high",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962458_141",
+    "timestamp": 1748962458,
+    "completed": false
+  },
+  {
+    "task": "Ajouter une docstring au package `pyasn1.codec.native`",
+    "priority": "medium",
+    "effort": "low",
+    "file": "__init__.py",
+    "source": "Gemini",
+    "id": "todo_1748962458_141",
+    "timestamp": 1748962458,
+    "completed": false
+  }
+]
