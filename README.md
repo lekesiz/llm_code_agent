@@ -162,7 +162,7 @@ Pour toute question ou problème, veuillez ouvrir une issue sur GitHub.
 
 ## Auteurs
 
-- [Votre Nom](https://github.com/lekesiz)
+- [Mikail Lekesiz](https://github.com/lekesiz)
 
 ## Remerciements
 
